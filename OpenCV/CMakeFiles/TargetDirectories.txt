@@ -1,3 +1,0 @@
-/home/carolina/Semestre 10/HPC/HighPerformanceComputing/OpenCV/CMakeFiles/rebuild_cache.dir
-/home/carolina/Semestre 10/HPC/HighPerformanceComputing/OpenCV/CMakeFiles/edit_cache.dir
-/home/carolina/Semestre 10/HPC/HighPerformanceComputing/OpenCV/CMakeFiles/displayImage.dir
