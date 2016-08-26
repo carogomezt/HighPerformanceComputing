@@ -13,7 +13,17 @@ int main(int argc, char **argv) {
 
   Mat image;
   image = imread(argv[1], CV_LOAD_IMAGE_COLOR); // Read the file
-  cout << image.shape;
+  int rows = image.rows;
+  int cols = image.cols;
+  cout << "rows: " << rows << " cols: " << cols << endl;
+  for (int i = 0; i < rows; i++) {
+    cout << "[ ";
+    for (int j = 0; j < cols; j++) {
+      cout << j << " ";
+    }
+    cout << " ]";
+    cout << endl;
+  }
 
   if (!image.data) // Check for invalid input
   {

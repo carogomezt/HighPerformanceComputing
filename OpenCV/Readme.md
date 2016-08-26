@@ -5,3 +5,18 @@
 For possible install error:
 
       sudo apt-get install qt5-default
+
+
+## Generate the executable
+
+This part is easy, just proceed as with any other project using CMake:
+
+      cd <displayImage_directory>
+    cmake .
+    make
+
+##  Result
+
+By now you should have an executable (called displayImage in this case). You just have to run it giving an image location as an argument, i.e.:
+
+      ./displayImage dream.jpg
