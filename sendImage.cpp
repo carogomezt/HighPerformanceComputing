@@ -31,7 +31,6 @@ void graySec(unsigned char *image, unsigned char *imgsec, int rows, int cols,int
     for (int j = 0; j < cols; j++) {
       grayOffset = i * width + j;
       rgbOffset = grayOffset * CHANNELS;
-      rgbOffset = grayOffset*CHANNELS;
       unsigned char b = image[rgbOffset]; // red value for pixel
       unsigned char g = image[rgbOffset + 2]; // green value for pixel
       unsigned char r = image[rgbOffset + 3]; // blue value for pixel
@@ -48,18 +47,47 @@ int main(int argc, char **argv) {
   int rows = image.rows;
   int cols = image.cols;
   int width = s.width;
+  int height = s.height;
+  unsigned char *d_image, *d_imgsec, *h_imageOutput;
+  int size = sizeof(unsigned char) * width * height * image.channels();
+  int sizeGray = sizeof(unsigned char) * width * height;
+  h_imageOutput = (unsigned char *)malloc(sizeGray);
+  cudaMalloc((void**)&d_image,sizeGray);
+  cudaMalloc((void**)&d_imgsec,sizeGray);
+
+
 
   graySec(image.data, imgsec, rows, cols, width);
-
+  
   Mat grayImg;
   grayImg.create(s.height, s.width, CV_8UC1);
   grayImg.data = imgsec;
+
+  
+
+  int blockSize = 32;
+  dim3 dimBlock(blockSize, blockSize, 1);
+  dim3 dimGrid(ceil(width/float(blockSize)), ceil(height/float(blockSize)), 1);
+
+  cudaMemcpy(d_imgsec, imgsec, size, cudaMemcpyHostToDevice);
+  cudaMemcpy(d_image, image.data, size, cudaMemcpyHostToDevice);
+
+  colorConvert<<<dimGrid, dimBlock>>>(d_imgsec, d_image, width, height);
+  cudaMemcpy(h_imageOutput, d_imgsec, sizeGray, cudaMemcpyDeviceToHost);
+
+  Mat grayImgCuda;
+  grayImgCuda.create(s.height, s.width, CV_8UC1);
+  grayImgCuda.data = h_imageOutput;
+
+
+
+
   if (!image.data) // Check for invalid input
   {
     cout << "Could not open or find the image" << std::endl;
     return -1;
   }
 
-  imwrite("./outputs/1088331150.png", grayImg);
+  imwrite("./outputs/1088297176.png", grayImgCuda);
   return 0;
 }
