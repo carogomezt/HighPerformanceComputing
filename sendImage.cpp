@@ -15,9 +15,9 @@ __global__ void colorConvert(unsigned char * grayImage,unsigned char * rgbImage,
         // one can think of the RGB image having
         // CHANNEL times columns than the gray scale image
         int rgbOffset = grayOffset*CHANNELS;
-        unsigned char r = rgbImage[rgbOffset]; // red value for pixel
-        unsigned char g = rgbImage[rgbOffset + 2]; // green value for pixel
-        unsigned char b = rgbImage[rgbOffset + 3]; // blue value for pixel
+     		unsigned char b = rgbImage[rgbOffset]; // red value for pixel
+     		unsigned char g = rgbImage[rgbOffset + 2]; // green value for pixel
+     		unsigned char r = rgbImage[rgbOffset + 3]; // blue value for pixel
         // perform the rescaling and store it
         // We multiply by floating point constants
         grayImage[grayOffset] = 0.21f*r + 0.71f*g + 0.07f*b;
@@ -48,11 +48,12 @@ int main(int argc, char **argv) {
   int cols = image.cols;
   int width = s.width;
   int height = s.height;
+  
   unsigned char *d_image, *d_imgsec, *h_imageOutput;
   int size = sizeof(unsigned char) * width * height * image.channels();
   int sizeGray = sizeof(unsigned char) * width * height;
   h_imageOutput = (unsigned char *)malloc(sizeGray);
-  cudaMalloc((void**)&d_image,sizeGray);
+  cudaMalloc((void**)&d_image,size);
   cudaMalloc((void**)&d_imgsec,sizeGray);
 
 
@@ -69,7 +70,7 @@ int main(int argc, char **argv) {
   dim3 dimBlock(blockSize, blockSize, 1);
   dim3 dimGrid(ceil(width/float(blockSize)), ceil(height/float(blockSize)), 1);
 
-  cudaMemcpy(d_imgsec, imgsec, size, cudaMemcpyHostToDevice);
+  //cudaMemcpy(d_imgsec, imgsec, size, cudaMemcpyHostToDevice);
   cudaMemcpy(d_image, image.data, size, cudaMemcpyHostToDevice);
 
   colorConvert<<<dimGrid, dimBlock>>>(d_imgsec, d_image, width, height);
