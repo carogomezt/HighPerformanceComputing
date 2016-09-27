@@ -131,6 +131,12 @@ que era obtenida al correr los algoritmos y a continuación se muestran los resu
 |800	  |1,4481208 |0,0057943|
 |1600	  |17,3060416 |0,03397735|
 
+![](img/img1.png)
 
+# Conclusiones
+
++ En conclucion vemos que a medida que aumenta el tamaño de las matrices las operaciones en cpu se hacen exponencialmente mas lentas, mientras que las operaciones en GPU con memoria compartida mantienen la velocidad en las operaciones de forma lineal por lo cual hay una aceleracion cuando se comparan con las operaciones realizadas en CPU, esta aceleracion se hace mas visible con matrices de gran tamaño.
+
++ Se tuvieron algunos problemas al calcular el tamaño que debian tener los TILES para obtener los resultados deseados cosa que nos retrazo un poco el trabajo, por lo cual se debe ser cuidadosos al momento de asignar el tamaño de los TILES y el BLOCKSIZE ya que estos afectan el resultado de las operaciones.
 
 
