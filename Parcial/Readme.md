@@ -6,13 +6,13 @@ que era obtenida al correr los algoritmos y a continuación se muestran los resu
 
 ## Información primera multiplicación de matrices 
 
-| F1 | C1 | F2 | C2 | TILES | BLOCKSIZE |
+| Row M1 | Col M1 | Row M2 | Col M2 | TILES | BLOCKSIZE |
 |----|----|----|----|-------|-----------|
 | 20 | 20 | 20 | 21 |   4   |     4     |
 
 ### Tiempos
 
-|Time CPU|Time GPU|
+|Time CPU (s)|Time GPU (s)|
 |--------|--------|
 |0,000031|0,000047|
 |0,000065|0,000047|
@@ -30,13 +30,13 @@ que era obtenida al correr los algoritmos y a continuación se muestran los resu
 
 ## Información segunda multiplicación de matrices 
 
-| F1 | C1 | F2 | C2 | TILES | BLOCKSIZE |
+| Row M1 | Col M1 | Row M2 | Col M2 | TILES | BLOCKSIZE |
 |----|----|----|----|-------|-----------|
 | 50 | 100 | 100 | 50 |   4   |     4     |
 
 ### Tiempos
 
-|Time CPU|Time GPU|
+|Time CPU (s)|Time GPU (s)|
 |--------|--------|
 |0,000750|0,000074|
 |0,000673|0,000074|
@@ -54,13 +54,13 @@ que era obtenida al correr los algoritmos y a continuación se muestran los resu
 
 ## Información tercera multiplicación de matrices 
 
-| F1 | C1 | F2 | C2 | TILES | BLOCKSIZE |
+| Row M1 | Col M1 | Row M2 | Col M2 | TILES | BLOCKSIZE |
 |----|----|----|----|-------|-----------|
 |200 |200 |200 |180 |   8   |     8     |
 
 ### Tiempos
 
-|Time CPU|Time GPU|
+|Time CPU (s)|Time GPU (s)|
 |--------|--------|
 |0,023564|0,000243|
 |0,021858|0,000254|
@@ -77,13 +77,13 @@ que era obtenida al correr los algoritmos y a continuación se muestran los resu
 
 ## Información cuarta multiplicación de matrices 
 
-| F1 | C1 | F2 | C2 | TILES | BLOCKSIZE |
+| Row M1 | Col M1 | Row M2 | Col M2 | TILES | BLOCKSIZE |
 |----|----|----|----|-------|-----------|
 |800 |800 |800 |700 |   16  |     16    |
 
 ### Tiempos
 
-|Time CPU|Time GPU|
+|Time CPU (s)|Time GPU (s)|
 |--------|--------|
 |1,469576|0,005793|
 |1,474436|0,005793|
@@ -100,13 +100,13 @@ que era obtenida al correr los algoritmos y a continuación se muestran los resu
 
 ## Información quinta multiplicación de matrices 
 
-| F1 | C1 | F2 | C2 | TILES | BLOCKSIZE |
+| Row M1 | Col M1 | Row M2 | Col M2 | TILES | BLOCKSIZE |
 |----|----|----|----|-------|-----------|
 |1600|1600|1600|1500|   32  |     32    |
 
 ### Tiempos
 
-|Time CPU	|Time GPU|
+|Time CPU (s)|Time GPU (s)|
 |--------|---------|
 |16,834443|0,033893|
 |17,382090|0,033851|
@@ -121,6 +121,15 @@ que era obtenida al correr los algoritmos y a continuación se muestran los resu
 |Promedio |Promedio|
 |17,306042|0,033977|
 
+# Grafica Comparativa de tiempos
+
+|Matrix (Row) |Time CPU (s) |	Time GPU (s)|
+|-------|-----------|-----------|
+|20	    |0,000046	  |0,000047|
+|50	    |0,000951	  |0,000074|
+|200	  |0,0241595 |0,0002466|
+|800	  |1,4481208 |0,0057943|
+|1600	  |17,3060416 |0,03397735|
 
 
 
