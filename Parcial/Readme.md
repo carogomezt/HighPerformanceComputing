@@ -1,10 +1,10 @@
 #Comparacion entre una implementacion secuencial (CPU), y una paralela usando Shared Memory (CUDA) para multiplicar 2 matrices
 
-Se implemento una operación de multiplicación de matrices en CUDA de forma secuencial y con memoria compartida por medio del uso de TILES, 
-posteriormente se probaron dichas implementaciones con diferentes tamaños de matrices y de TILES. Se tomaron muestras de tiempos para verificar la aceleración 
+Se implemento una operación de multiplicación de matrices en CUDA de forma secuencial y con memoria compartida por medio del uso de TILES,
+posteriormente se probaron dichas implementaciones con diferentes tamaños de matrices y de TILES. Se tomaron muestras de tiempos para verificar la aceleración
 que era obtenida al correr los algoritmos y a continuación se muestran los resultados:
 
-## Información primera multiplicación de matrices 
+## Información primera multiplicación de matrices
 
 | Row M1 | Col M1 | Row M2 | Col M2 | TILES | BLOCKSIZE |
 |----|----|----|----|-------|-----------|
@@ -28,7 +28,7 @@ que era obtenida al correr los algoritmos y a continuación se muestran los resu
 |Promedio|Promedio|
 |0,000046|0,000047|
 
-## Información segunda multiplicación de matrices 
+## Información segunda multiplicación de matrices
 
 | Row M1 | Col M1 | Row M2 | Col M2 | TILES | BLOCKSIZE |
 |----|----|----|----|-------|-----------|
@@ -52,7 +52,7 @@ que era obtenida al correr los algoritmos y a continuación se muestran los resu
 |Promedio|Promedio|
 |0,000951|0,000074|
 
-## Información tercera multiplicación de matrices 
+## Información tercera multiplicación de matrices
 
 | Row M1 | Col M1 | Row M2 | Col M2 | TILES | BLOCKSIZE |
 |----|----|----|----|-------|-----------|
@@ -75,7 +75,7 @@ que era obtenida al correr los algoritmos y a continuación se muestran los resu
 |Promedio|Promedio|
 |0,024160|0,000247|
 
-## Información cuarta multiplicación de matrices 
+## Información cuarta multiplicación de matrices
 
 | Row M1 | Col M1 | Row M2 | Col M2 | TILES | BLOCKSIZE |
 |----|----|----|----|-------|-----------|
@@ -98,7 +98,7 @@ que era obtenida al correr los algoritmos y a continuación se muestran los resu
 |Promedio|Promedio|
 |1,448121|0,005794|
 
-## Información quinta multiplicación de matrices 
+## Información quinta multiplicación de matrices
 
 | Row M1 | Col M1 | Row M2 | Col M2 | TILES | BLOCKSIZE |
 |----|----|----|----|-------|-----------|
@@ -121,22 +121,25 @@ que era obtenida al correr los algoritmos y a continuación se muestran los resu
 |Promedio |Promedio|
 |17,306042|0,033977|
 
-# Grafica Comparativa de tiempos
+# Gráfica Comparativa de tiempos
 
-|Matrix (Row) |Time CPU (s) |	Time GPU (s)|
-|-------|-----------|-----------|
-|20	    |0,000046	  |0,000047|
-|50	    |0,000951	  |0,000074|
-|200	  |0,0241595 |0,0002466|
-|800	  |1,4481208 |0,0057943|
-|1600	  |17,3060416 |0,03397735|
+|Matrix (Row) |Time CPU (s) |	Time GPU (s)| Acceleration|
+|-------|-----------|-----------|-----------|
+|20	    |0,000046	  |0,000047|0,978599222|
+|50	    |0,000951	  |0,000074|12,79804162|
+|200	  |0,0241595 |0,0002466|97,9703974|
+|800	  |1,4481208 |0,0057943|249,9216126|
+|1600	  |17,3060416 |0,03397735|509,3405342|
+
 
 ![](img/img1.png)
+
+## Gráfica de Aceleración
+
+![](img/im2.png)
 
 # Conclusiones
 
 + En conclucion vemos que a medida que aumenta el tamaño de las matrices las operaciones en cpu se hacen exponencialmente mas lentas, mientras que las operaciones en GPU con memoria compartida mantienen la velocidad en las operaciones de forma lineal por lo cual hay una aceleracion cuando se comparan con las operaciones realizadas en CPU, esta aceleracion se hace mas visible con matrices de gran tamaño.
 
 + Se tuvieron algunos problemas al calcular el tamaño que debian tener los TILES para obtener los resultados deseados cosa que nos retrazo un poco el trabajo, por lo cual se debe ser cuidadosos al momento de asignar el tamaño de los TILES y el BLOCKSIZE ya que estos afectan el resultado de las operaciones.
-
-
