@@ -27,7 +27,6 @@ __global__ void MultTiled(float *M, float *N, float *P) {
   int Row = by * blockDim.y + ty;
   int Col = bx * blockDim.x + tx;
   float PValue = 0.0;
-  cout << "#hla" << endl;
   for (int p = 0; p < (TILE_WIDTH + MCols - 1) / TILE_WIDTH; p++) {
 
     if (p * TILE_WIDTH + tx < MCols && Row < MRows)

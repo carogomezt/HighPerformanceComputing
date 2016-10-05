@@ -95,7 +95,7 @@ int main(){
   dim3 dimGrid(ceil(W/blockSize),ceil(H/blockSize),1);
   
   start = clock();
-  multMatCUDA<<< dimBlock, dimGrid >>>(d_a, d_b, d_c);
+  multMatCUDA<<< dimGrid, dimBlock >>>(d_a, d_b, d_c);
   cudaMemcpy(h_result, d_c, H*W*sizeof(int), cudaMemcpyDeviceToHost);
   end = clock();
   gpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
