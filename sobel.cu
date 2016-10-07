@@ -6,6 +6,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <cv.h>
 
+
 using namespace cv;
 using namespace std;
 #define CHANNELS 3
@@ -64,32 +65,26 @@ int main(int argc, char **argv) {
   cudaMalloc((void **)&mask2, maskwidth * maskwidth);
 
 
-  Mat grayImg;
-  grayImg.create(s.height, s.width, CV_8UC1);
-  grayImg.data = image_Gray;
-
   int blockSize = 32;
   dim3 dimBlock(blockSize, blockSize, 1);
   dim3 dimGrid(ceil(width / float(blockSize)), ceil(height / float(blockSize)),
                1);
 
-  // cudaMemcpy(d_image_Gray, image_Gray, size, cudaMemcpyHostToDevice);
   
   cudaMemcpy(mask1, h_mask1, maskwidth * maskwidth * sizeof(unsigned char), cudaMemcpyHostToDevice);
   cudaMemcpy(mask2, h_mask2, maskwidth * maskwidth * sizeof(unsigned char), cudaMemcpyHostToDevice);
 
-  //colorConvert<<<dimGrid, dimBlock>>>(d_image_Gray, d_image, width, height);
-  
-  
-  Mat grad_x, abs_grad_x;
-  cvtColor(image, grayImg, CV_BGR2GRAY);
-  Sobel(grayImg, grad_x, CV_8UC1, 1, 0, 3, 1, 0, BORDER_DEFAULT);
+  Mat gray_image_opencv, grad_x, abs_grad_x,grayImg;
+  cvtColor(image, gray_image_opencv, CV_BGR2GRAY);
+  Sobel(gray_image_opencv, grad_x, CV_8UC1, 1, 0, 3, 1, 0, BORDER_DEFAULT);
   convertScaleAbs(grad_x, abs_grad_x);
+  
+  cvtColor(image, grayImg, CV_BGR2GRAY);
   
   cudaMemcpy(d_image_Gray, grayImg.data, size, cudaMemcpyHostToDevice);
   
-  //sobel<<<dimGrid, dimBlock>>>(d_image_Gray, mask1, mask2, out, maskwidth, width, height);
-  //cudaMemcpy(h_imageOutput, out, sizeGray, cudaMemcpyDeviceToHost);
+  sobel<<<dimGrid, dimBlock>>>(d_image_Gray, mask1, mask2, out, maskwidth, width, height);
+  cudaMemcpy(h_imageOutput, out, sizeGray, cudaMemcpyDeviceToHost);
   
   Mat grayImgCuda;
   grayImgCuda.create(s.height, s.width, CV_8UC1);
@@ -101,6 +96,6 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  imwrite("./outputs/1088331150.png", abs_grad_x);
+  imwrite("./outputs/1088331150.png", grayImgCuda);
   return 0;
 }
