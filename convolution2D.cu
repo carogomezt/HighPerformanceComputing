@@ -7,8 +7,8 @@ using namespace std;
 
 __global__ void convolution_2D_basic_kernel(int *in, int *mask, int *out,
                                             int maskwidth, int w, int h) {
-  int Col = blockIdx.x * blockDim.x * threadIdx.x;
-  int Row = blockIdx.y * blockDim.y * threadIdx.y;
+  int Col = blockIdx.x * blockDim.x + threadIdx.x;
+  int Row = blockIdx.y * blockDim.y + threadIdx.y;
 
   if (Col < w && Row < h) {
     int pixVal = 0;
