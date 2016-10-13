@@ -7,28 +7,32 @@
 #include <stdio.h>
 #include <time.h>
 
+#define CHANNELS 3
+#define MASK_WIDTH 3
+
+__constant__ char M1[MASK_WIDTH * MASK_WIDTH];
+__constant__ char M2[MASK_WIDTH * MASK_WIDTH];
+
 using namespace cv;
 using namespace std;
-#define CHANNELS 3
 
-__global__ void sobel(unsigned char *in, char *mask1, char *mask2,
-                      unsigned char *out, int maskwidth, int w, int h) {
+__global__ void sobel(unsigned char *in, unsigned char *out, int w, int h) {
   int Col = blockIdx.x * blockDim.x + threadIdx.x;
   int Row = blockIdx.y * blockDim.y + threadIdx.y;
 
   if (Col < w && Row < h) {
     int Gx = 0, Gy = 0;
-    int N_start_col = Col - (maskwidth / 2);
-    int N_start_row = Row - (maskwidth / 2);
+    int N_start_col = Col - (MASK_WIDTH / 2);
+    int N_start_row = Row - (MASK_WIDTH / 2);
 
-    for (int j = 0; j < maskwidth; j++) {
-      for (int k = 0; k < maskwidth; k++) {
+    for (int j = 0; j < MASK_WIDTH; j++) {
+      for (int k = 0; k < MASK_WIDTH; k++) {
         int curRow = N_start_row + j;
         int curCol = N_start_col + k;
 
         if (curRow > -1 && curRow < h && curCol > -1 && curCol < w) {
-          Gx += in[curRow * w + curCol] * mask1[j * maskwidth + k];
-          Gy += in[curRow * w + curCol] * mask2[j * maskwidth + k];
+          Gx += in[curRow * w + curCol] * M1[j * MASK_WIDTH + k];
+          Gy += in[curRow * w + curCol] * M2[j * MASK_WIDTH + k];
         }
       }
     }
@@ -58,13 +62,11 @@ int main(int argc, char **argv) {
   int height = s.height;
 
   // Definicion de mascaras
-  int maskwidth = 3;
   char h_mask1[] = {-1, 0, 1, -2, 0, 2, -1, 0, 1};
   char h_mask2[] = {-1, -2, -1, 0, 0, 0, 1, 2, 1};
 
   // Definicion de variables que se manejaran en el device
   unsigned char *d_image_Gray, *h_imageOutput, *out;
-  char *mask1, *mask2;
 
   // Reserva de memora para variales en host
   h_imageOutput =
@@ -73,8 +75,6 @@ int main(int argc, char **argv) {
   // Reserva de memoria para variables en device
   cudaMalloc((void **)&d_image_Gray, sizeof(unsigned char) * width * height);
   cudaMalloc((void **)&out, sizeof(unsigned char) * width * height);
-  cudaMalloc((void **)&mask1, sizeof(char) * maskwidth * maskwidth);
-  cudaMalloc((void **)&mask2, sizeof(char) * maskwidth * maskwidth);
 
   // Definicion de los bloques e hilos por bloques
   int blockSize = 32;
@@ -83,10 +83,8 @@ int main(int argc, char **argv) {
                1);
 
   // Copiando los datos del host al device
-  cudaMemcpy(mask1, h_mask1, maskwidth * maskwidth * sizeof(char),
-             cudaMemcpyHostToDevice);
-  cudaMemcpy(mask2, h_mask2, maskwidth * maskwidth * sizeof(char),
-             cudaMemcpyHostToDevice);
+  cudaMemcpyToSymbol(M1, h_mask1, sizeof(char) * MASK_WIDTH * MASK_WIDTH);
+  cudaMemcpyToSymbol(M2, h_mask2, sizeof(char) * MASK_WIDTH * MASK_WIDTH);
 
   // Convirtiendo imagen en escala de grises con openCV
   Mat grayImg;
@@ -97,8 +95,7 @@ int main(int argc, char **argv) {
              cudaMemcpyHostToDevice);
 
   // Lanzando el kernel
-  sobel<<<dimGrid, dimBlock>>>(d_image_Gray, mask1, mask2, out, maskwidth,
-                               width, height);
+  sobel<<<dimGrid, dimBlock>>>(d_image_Gray, out, width, height);
 
   // Copiando el resultado del device al host
   cudaMemcpy(h_imageOutput, out, width * height * sizeof(unsigned char),
