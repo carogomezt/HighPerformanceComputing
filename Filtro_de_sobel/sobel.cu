@@ -56,7 +56,7 @@ __global__ void sobel(unsigned char *in, unsigned char *out, int w, int h) {
 int main(int argc, char **argv) {
   // Lectura de la imagen con openCV
   Mat image;
-  image = imread("./inputs/img4.jpg", CV_LOAD_IMAGE_COLOR); // Read the file
+  image = imread("perro.jpg", CV_LOAD_IMAGE_COLOR); // Read the file
   Size s = image.size();
   int width = s.width;
   int height = s.height;
@@ -119,7 +119,7 @@ int main(int argc, char **argv) {
   }
 
   // Guardando la imagen generada por CUDA
-  imwrite("./outputs/1088331150.png", grayImgCuda);
+  imwrite("perrogris.png", grayImgCuda);
 
   // Guardando la imagen generada por openCV
   // imwrite("./outputs/1088331150.png", abs_grad_x);
