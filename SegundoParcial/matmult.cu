@@ -1,41 +1,68 @@
 #include <cuda.h>
+#include <iostream>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 // Multiplicacion de Fila - Matriz
 
-__global__ void multMatCUDA(float *d_a,float *d_b,float *d_c, int NRA, int NCA, int NCB){
+__global__ void multMatCUDA(double *d_a, double *d_b, double *d_c, int NRA,
+                            int NCA, int NCB) {
   int row = blockIdx.y * blockDim.y + threadIdx.y;
   int col = blockIdx.x * blockDim.x + threadIdx.x;
-  
-  if(row < NRA && col < NCB){
-    float result = 0;
-    for(int k = 0; k < NCA; k++){
-      result += d_a[row * NCA + k] * d_b[k * NCB + col];
+
+  if (row < NRA && col < NCB) {
+    double result = 0;
+    for (int j = 0; j < NCA; j++) {
+      result += d_a[row * NCA + j] * d_b[j * NCB + col];
     }
     d_c[row * NCB + col] = result;
   }
 }
 
-void Mult_RowMat(float *M_a, float *M_b, float *R_c, int NRA, int NCA, int NCB) {
-  float blockSize = 32;
-  float *d_a, *d_b, *d_c;
-      
-  //Asignacion de memoria en el device
-  cudaMalloc(&d_a, sizeof(float) * NRA * NCA);
-  cudaMalloc(&d_b, sizeof(float) * NCA * NCB);
-  cudaMalloc(&d_c, sizeof(float) * NRA * NCB);  
+void multMat(double *M_a, double *M_b, double *R_c, int NRA, int NCA, int NCB) {
+  int blockSize = 32;
+  double *d_a, *d_b, *d_c;
 
-  cudaMemcpy(d_a, M_a, NRA * NCA * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_b, M_b, NCA * NCB * sizeof(float), cudaMemcpyHostToDevice);
-   
+  printf("MAT A\n");
+  for (int i = 0; i < NRA; i++) {
+    for (int j = 0; j < NCA; j++) {
+      printf("%f ", M_a[i * NCA + j]);
+    }
+    printf("\n");
+  }
+
+  printf("MAT B\n");
+  for (int i = 0; i < NCA; i++) {
+    for (int j = 0; j < NCB; j++) {
+      printf("%f ", M_b[i * NCB + j]);
+    }
+    printf("\n");
+  }
+
+  // Asignacion de memoria en el device
+  cudaMalloc(&d_a, sizeof(double) * NRA * NCA);
+  cudaMalloc(&d_b, sizeof(double) * NCA * NCB);
+  cudaMalloc(&d_c, sizeof(double) * NRA * NCB);
+
+  cudaMemcpy(d_a, M_a, NRA * NCA * sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_b, M_b, NCA * NCB * sizeof(double), cudaMemcpyHostToDevice);
+
   dim3 dimBlock(blockSize, blockSize, 1);
-  dim3 dimGrid(ceil(NRA/blockSize),ceil(NCB/blockSize),1);
-  
-  multMatCUDA<<< dimGrid, dimBlock >>>(d_a, d_b, d_c, NRA, NCA, NCB);
-  cudaMemcpy(R_c, d_c, NRA * NCB * sizeof(float), cudaMemcpyDeviceToHost);
-  
+  dim3 dimGrid(ceil(NCB / blockSize), ceil(NRA / blockSize), 1);
+
+  multMatCUDA<<<dimGrid, dimBlock>>>(d_a, d_b, d_c, NRA, NCA, NCB);
+  cudaMemcpy(R_c, d_c, NRA * NCB * sizeof(double), cudaMemcpyDeviceToHost);
+
+  printf("MAT CUDA\n");
+  for (size_t i = 0; i < NRA; i++) {
+    for (size_t j = 0; j < NCB; j++) {
+      printf("%f ", R_c[i * NCB + j]);
+    }
+    printf("\n");
+  }
+
   cudaFree(d_a);
   cudaFree(d_b);
   cudaFree(d_c);
-
 }
