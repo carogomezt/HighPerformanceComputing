@@ -6,11 +6,33 @@
 
 using namespace std;
 
-void multMat(double *M_a, double *M_b, double *R_c, int NRA, int NCA, int NCB);
+void multMatCUDA(double *M_a, double *M_b, double *R_c, int NRA, int NCA,
+                 int NCB);
 
 #define MASTER 0      /* taskid of first task */
 #define FROM_MASTER 1 /* setting a message type */
 #define FROM_WORKER 2 /* setting a message type */
+
+void multMatMPI(double *a, double *b, double *c, int NRA, int NCA, int NCB) {
+  for (int k = 0; k < NCB; ++k) {
+    for (int i = 0; i < NRA; ++i) {
+      for (int j = 0; j < NCA; ++j) {
+        c[i * NCB + k] += a[i * NCA + j] * b[j * NCB + k];
+      }
+    }
+  }
+}
+
+bool compareTo(double *c, double *d_c, int H, int W) {
+  for (int i = 0; i < H; i++) {
+    for (int j = 0; j < W; j++) {
+      if (c[i * W + j] != d_c[i * W + j]) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
 
 int main(int argc, char *argv[]) {
   int numtasks,   /* number of tasks in partition */
@@ -24,13 +46,14 @@ int main(int argc, char *argv[]) {
       offset,      /* used to determine elements sent to each worker */
       i, j, k, rc; /* misc */
 
-  int NRA = 3;
-  int NCA = 5;
-  int NCB = 3;
+  int NRA = 10000;
+  int NCA = 10000;
+  int NCB = 10000;
 
   double *a, /* matrix A to be multiplied */
       *b,    /* matrix B to be multiplied */
-      *c;    /* result matrix C */
+      *c,    /* result matrix C in MPI*/
+      *d_c;  /* result matrix C in CUDA*/
 
   MPI_Status status;
 
@@ -47,11 +70,12 @@ int main(int argc, char *argv[]) {
   numworkers = numtasks - 1;
 
   /**************************** master task
-   * ************************************/
+   * **************************************/
   if (taskid == MASTER) {
     a = (double *)malloc(NRA * NCA * sizeof(double));
     b = (double *)malloc(NCA * NCB * sizeof(double));
     c = (double *)malloc(NRA * NCB * sizeof(double));
+    d_c = (double *)malloc(NRA * NCB * sizeof(double));
 
     printf("mpi_mm has started with %d tasks.\n", numtasks);
     printf("Initializing arrays...\n");
@@ -102,22 +126,36 @@ int main(int argc, char *argv[]) {
       MPI_Recv(&elements, 1, MPI_INT, source, mtype, MPI_COMM_WORLD, &status);
       MPI_Recv(&c[offset * NCB], elements * NCB, MPI_DOUBLE, source, mtype,
                MPI_COMM_WORLD, &status);
+      MPI_Recv(&d_c[offset * NCB], elements * NCB, MPI_DOUBLE, source, mtype,
+               MPI_COMM_WORLD, &status);
       printf("Received results from task %d\n", source);
     }
 
     /* Print results */
-    printf("******************************************************\n");
-    printf("Result Matrix:\n");
-
-    for (i = 0; i < NRA; i++) {
-      for (j = 0; j < NCB; j++) {
-        cout << c[i * NCB + j] << " ";
-      }
-      cout << endl;
+    // printf("******************************************************\n");
+    // printf("Result Matrix with MPI:\n");
+    //
+    // for (i = 0; i < NRA; i++) {
+    //   for (j = 0; j < NCB; j++) {
+    //     cout << c[i * NCB + j] << " ";
+    //   }
+    //   cout << endl;
+    // }
+    // printf("Result Matrix with CUDA:\n");
+    // for (i = 0; i < NRA; i++) {
+    //   for (j = 0; j < NCB; j++) {
+    //     cout << d_c[i * NCB + j] << " ";
+    //   }
+    //   cout << endl;
+    // }
+    //
+    // printf("\n******************************************************\n");
+    // printf("Done.\n");
+    if (compareTo(c, d_c, elements, NCB))
+      cout << "Funciona!" << endl;
+    else {
+      cout << "No Funciona" << endl;
     }
-
-    printf("\n******************************************************\n");
-    printf("Done.\n");
   }
 
   /**************************** worker task
@@ -130,51 +168,25 @@ int main(int argc, char *argv[]) {
     a = (double *)malloc(elements * NCA * sizeof(double));
     b = (double *)malloc(NCA * NCB * sizeof(double));
     c = (double *)malloc(elements * NCB * sizeof(double));
+    d_c = (double *)malloc(elements * NCB * sizeof(double));
 
     MPI_Recv(a, elements * NCA, MPI_DOUBLE, MASTER, mtype, MPI_COMM_WORLD,
              &status);
     MPI_Recv(b, NCA * NCB, MPI_DOUBLE, MASTER, mtype, MPI_COMM_WORLD, &status);
 
-    // for (int k = 0; k < NCB; ++k) {
-    //   for (int i = 0; i < elements; ++i) {
-    //     for (int j = 0; j < NCA; ++j) {
-    //       c[i * NCB + k] += a[i * NCA + j] * b[j * NCB + k];
-    //       // cout << "[" << i * NCB + k << "]"
-    //       //      << "c(" << c[i * NCB + k] << ")"
-    //       //      << "->"
-    //       //      << "[" << i * NCA + j << "] "
-    //       //      << "a(" << a[i * NCA + j] << ")"
-    //       //      << "[" << i * NCB + k << "]"
-    //       //      << "b(" << b[j * NCB + k] << ")" << endl;
-    //     }
-    //   }
-    // }
+    multMatMPI(a, b, c, elements, NCA, NCB);
 
-    // printf("MAT A\n");
-    // for (int i = 0; i < NRA; i++) {
-    //   for (int j = 0; j < NCA; j++) {
-    //     printf("%f ", a[i * NCA + j]);
-    //   }
-    //   printf("\n");
-    // }
-    //
-    // printf("MAT B\n");
-    // for (int i = 0; i < NCA; i++) {
-    //   for (int j = 0; j < NCB; j++) {
-    //     printf("%f ", b[i * NCB + j]);
-    //   }
-    //   printf("\n");
-    // }
-
-    multMat(a, b, c, elements, NCA, NCB);
+    multMatCUDA(a, b, d_c, elements, NCA, NCB);
 
     mtype = FROM_WORKER;
     MPI_Send(&offset, 1, MPI_INT, MASTER, mtype, MPI_COMM_WORLD);
     MPI_Send(&elements, 1, MPI_INT, MASTER, mtype, MPI_COMM_WORLD);
     MPI_Send(c, elements * NCB, MPI_DOUBLE, MASTER, mtype, MPI_COMM_WORLD);
+    MPI_Send(d_c, elements * NCB, MPI_DOUBLE, MASTER, mtype, MPI_COMM_WORLD);
   }
   MPI_Finalize();
   free(a);
   free(b);
   free(c);
+  free(d_c);
 }
