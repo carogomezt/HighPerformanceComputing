@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 using namespace std;
 
@@ -34,6 +35,17 @@ bool compareTo(double *c, double *d_c, int H, int W) {
   return true;
 }
 
+bool compare(double *d_c, int H, int W, int NCA) {
+  for (int i = 0; i < H; i++) {
+    for (int j = 0; j < W; j++) {
+      if (NCA != d_c[i * W + j]) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 int main(int argc, char *argv[]) {
   int numtasks,   /* number of tasks in partition */
       taskid,     /* a task identifier */
@@ -46,9 +58,12 @@ int main(int argc, char *argv[]) {
       offset,      /* used to determine elements sent to each worker */
       i, j, k, rc; /* misc */
 
-  int NRA = 10000;
-  int NCA = 10000;
-  int NCB = 10000;
+  clock_t start, end;
+  double time_used;
+
+  int NRA = 19000;
+  int NCA = 19000;
+  int NCB = 19000;
 
   double *a, /* matrix A to be multiplied */
       *b,    /* matrix B to be multiplied */
@@ -82,16 +97,18 @@ int main(int argc, char *argv[]) {
     double cont = 1;
     for (i = 0; i < NRA; i++) {
       for (j = 0; j < NCA; j++) {
-        a[i * NCA + j] = cont++;
+        a[i * NCA + j] = 1;
       }
     }
 
     cont = 1;
     for (i = 0; i < NCA; i++) {
       for (j = 0; j < NCB; j++) {
-        b[i * NCB + j] = cont++;
+        b[i * NCB + j] = 1;
       }
     }
+
+    start = clock();
 
     /* Send matrix data to the worker tasks */
     averow = NRA / numworkers;
@@ -131,6 +148,10 @@ int main(int argc, char *argv[]) {
       printf("Received results from task %d\n", source);
     }
 
+    end = clock();
+    time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+    printf("Tiempo invertido = %lf s\n", time_used);
+
     /* Print results */
     // printf("******************************************************\n");
     // printf("Result Matrix with MPI:\n");
@@ -151,7 +172,12 @@ int main(int argc, char *argv[]) {
     //
     // printf("\n******************************************************\n");
     // printf("Done.\n");
-    if (compareTo(c, d_c, elements, NCB))
+    // if (compareTo(c, d_c, elements, NCB))
+    //   cout << "Funciona!" << endl;
+    // else {
+    //   cout << "No Funciona" << endl;
+    // }
+    if (compare(d_c, NRA, NCB, NCA))
       cout << "Funciona!" << endl;
     else {
       cout << "No Funciona" << endl;
@@ -174,7 +200,7 @@ int main(int argc, char *argv[]) {
              &status);
     MPI_Recv(b, NCA * NCB, MPI_DOUBLE, MASTER, mtype, MPI_COMM_WORLD, &status);
 
-    multMatMPI(a, b, c, elements, NCA, NCB);
+    // multMatMPI(a, b, c, elements, NCA, NCB);
 
     multMatCUDA(a, b, d_c, elements, NCA, NCB);
 
