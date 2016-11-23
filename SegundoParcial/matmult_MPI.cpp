@@ -61,9 +61,9 @@ int main(int argc, char *argv[]) {
   clock_t start, end;
   double time_used;
 
-  int NRA = 19000;
-  int NCA = 19000;
-  int NCB = 19000;
+  int NRA = 12000;
+  int NCA = 12000;
+  int NCB = 12000;
 
   double *a, /* matrix A to be multiplied */
       *b,    /* matrix B to be multiplied */
@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
     // else {
     //   cout << "No Funciona" << endl;
     // }
-    if (compare(d_c, NRA, NCB, NCA))
+    if (compare(c, NRA, NCB, NCA))
       cout << "Funciona!" << endl;
     else {
       cout << "No Funciona" << endl;
@@ -200,9 +200,9 @@ int main(int argc, char *argv[]) {
              &status);
     MPI_Recv(b, NCA * NCB, MPI_DOUBLE, MASTER, mtype, MPI_COMM_WORLD, &status);
 
-    // multMatMPI(a, b, c, elements, NCA, NCB);
+    multMatMPI(a, b, c, elements, NCA, NCB);
 
-    multMatCUDA(a, b, d_c, elements, NCA, NCB);
+    //multMatCUDA(a, b, d_c, elements, NCA, NCB);
 
     mtype = FROM_WORKER;
     MPI_Send(&offset, 1, MPI_INT, MASTER, mtype, MPI_COMM_WORLD);
